@@ -15,3 +15,7 @@ variable "state_region" {
 variable "aws_lb_controller_chart_version" {
   type = string
 }
+
+variable "kyverno_chart_version" {
+  type = string
+}

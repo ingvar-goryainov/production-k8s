@@ -1,0 +1,68 @@
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: person-label-student
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        training/role: student
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: >-
+          has(object.metadata.labels)
+          ? [JSONPatch{op: "add", path: "/metadata/labels/person", value: "student"}]
+          : [JSONPatch{op: "add", path: "/metadata/labels", value: {"person": "student"}}]
+---
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: person-label-mentor
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        training/role: mentor
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: >-
+          has(object.metadata.labels)
+          ? [JSONPatch{op: "add", path: "/metadata/labels/person", value: "mentor"}]
+          : [JSONPatch{op: "add", path: "/metadata/labels", value: {"person": "mentor"}}]
+---
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: person-label-strip
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+    namespaceSelector:
+      # NotIn also matches namespaces without the label, such as default.
+      matchExpressions:
+        - key: training/role
+          operator: NotIn
+          values: ["student", "mentor"]
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: >-
+          has(object.metadata.labels) && "person" in object.metadata.labels
+          ? [JSONPatch{op: "remove", path: "/metadata/labels/person"}]
+          : []
