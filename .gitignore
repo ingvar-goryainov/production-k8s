@@ -29,6 +29,8 @@ override.tf.json
 *.ovpn
 kubeconfig
 kubeconfig.*
+*.kubeconfig
+/kubeconfigs/
 *.pem
 *.key
 
