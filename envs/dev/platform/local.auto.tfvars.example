@@ -1,0 +1,3 @@
+# Copy to local.auto.tfvars (gitignored). Terraform loads it automatically.
+# Same bucket as in the repo-root backend.hcl.
+state_bucket = "eks-tfstate-<ACCOUNT_ID>-eu-west-1"

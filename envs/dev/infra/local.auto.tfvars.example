@@ -1,0 +1,15 @@
+# Copy to local.auto.tfvars (gitignored). Terraform loads it automatically.
+
+# Required: only these explicit principals may assume the eks-dev-admin role.
+admin_trusted_principal_arns = ["arn:aws:iam::<ACCOUNT_ID>:role/<YOUR_ROLE>"]
+
+# Required: exact versions selected from the AWS-supported add-on versions for
+# kubernetes_version and region. Do not use "latest" or resolve these dynamically.
+addon_versions = {
+  vpc_cni                = "<VPC_CNI_ADDON_VERSION>"
+  eks_pod_identity_agent = "<POD_IDENTITY_AGENT_ADDON_VERSION>"
+  kube_proxy             = "<KUBE_PROXY_ADDON_VERSION>"
+  coredns                = "<COREDNS_ADDON_VERSION>"
+  aws_ebs_csi_driver     = "<EBS_CSI_ADDON_VERSION>"
+  metrics_server         = "<METRICS_SERVER_ADDON_VERSION>"
+}

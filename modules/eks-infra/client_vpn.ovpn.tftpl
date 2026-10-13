@@ -1,0 +1,18 @@
+client
+dev tun
+proto ${protocol}
+remote ${remote} ${port}
+remote-random-hostname
+resolv-retry infinite
+nobind
+remote-cert-tls server
+verify-x509-name ${server_name} name
+cipher AES-256-GCM
+verb 3
+reneg-sec 0
+<ca>
+${ca_cert}</ca>
+<cert>
+${client_cert}</cert>
+<key>
+${client_key}</key>

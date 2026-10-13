@@ -1,0 +1,36 @@
+# Terraform provider and module cache.
+.terraform/
+
+# Local state and lock metadata.
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+
+# Local backend configuration and automatically loaded account-specific values.
+/backend.hcl
+**/local.auto.tfvars
+
+# Plan files can contain sensitive resource attributes and proposed changes.
+tfplan
+tfplan.*
+*.tfplan
+*.tfplan.*
+
+# Terraform crash logs and local override files.
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Credentials and client material that must never be committed:
+# exported VPN profiles (embed the client private key), kubeconfigs, keys.
+*.ovpn
+kubeconfig
+kubeconfig.*
+*.pem
+*.key
+
+# macOS.
+.DS_Store
