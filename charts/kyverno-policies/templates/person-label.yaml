@@ -1,29 +1,9 @@
-apiVersion: policies.kyverno.io/v1
-kind: MutatingPolicy
-metadata:
-  name: person-label-student
-spec:
-  matchConstraints:
-    resourceRules:
-      - apiGroups: [""]
-        apiVersions: ["v1"]
-        operations: ["CREATE", "UPDATE"]
-        resources: ["pods"]
-    namespaceSelector:
-      matchLabels:
-        training/role: student
-  mutations:
-    - patchType: JSONPatch
-      jsonPatch:
-        expression: >-
-          has(object.metadata.labels)
-          ? [JSONPatch{op: "add", path: "/metadata/labels/person", value: "student"}]
-          : [JSONPatch{op: "add", path: "/metadata/labels", value: {"person": "student"}}]
+{{- range .Values.personLabel.roles }}
 ---
 apiVersion: policies.kyverno.io/v1
 kind: MutatingPolicy
 metadata:
-  name: person-label-mentor
+  name: person-label-{{ . }}
 spec:
   matchConstraints:
     resourceRules:
@@ -33,14 +13,15 @@ spec:
         resources: ["pods"]
     namespaceSelector:
       matchLabels:
-        training/role: mentor
+        {{ $.Values.personLabel.namespaceLabel }}: {{ . }}
   mutations:
     - patchType: JSONPatch
       jsonPatch:
         expression: >-
           has(object.metadata.labels)
-          ? [JSONPatch{op: "add", path: "/metadata/labels/person", value: "mentor"}]
-          : [JSONPatch{op: "add", path: "/metadata/labels", value: {"person": "mentor"}}]
+          ? [JSONPatch{op: "add", path: "/metadata/labels/person", value: "{{ . }}"}]
+          : [JSONPatch{op: "add", path: "/metadata/labels", value: {"person": "{{ . }}"}}]
+{{- end }}
 ---
 apiVersion: policies.kyverno.io/v1
 kind: MutatingPolicy
@@ -56,9 +37,9 @@ spec:
     namespaceSelector:
       # NotIn also matches namespaces without the label, such as default.
       matchExpressions:
-        - key: training/role
+        - key: {{ .Values.personLabel.namespaceLabel }}
           operator: NotIn
-          values: ["student", "mentor"]
+          values: {{ toJson .Values.personLabel.roles }}
   mutations:
     - patchType: JSONPatch
       jsonPatch:

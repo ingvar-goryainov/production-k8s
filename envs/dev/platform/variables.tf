@@ -16,6 +16,14 @@ variable "aws_lb_controller_chart_version" {
   type = string
 }
 
-variable "kyverno_chart_version" {
+variable "argocd_chart_version" {
+  type = string
+}
+
+variable "argocd_apps_chart_version" {
+  type = string
+}
+
+variable "gitops_repo_url" {
   type = string
 }

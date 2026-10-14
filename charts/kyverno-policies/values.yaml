@@ -1,0 +1,9 @@
+personLabel:
+  namespaceLabel: training/role
+  roles:
+    - student
+    - mentor
+
+readOnlyRootFilesystem:
+  validationActions:
+    - Audit

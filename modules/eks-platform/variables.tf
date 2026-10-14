@@ -18,7 +18,17 @@ variable "aws_lb_controller_chart_version" {
   type        = string
 }
 
-variable "kyverno_chart_version" {
-  description = "Version of the kyverno Helm chart. The manifests in k8s/policies/ use the policies.kyverno.io/v1 types, which need Kyverno 1.17 or later."
+variable "argocd_chart_version" {
+  description = "Version of the argo-cd Helm chart."
+  type        = string
+}
+
+variable "argocd_apps_chart_version" {
+  description = "Version of the argocd-apps Helm chart that creates the root Application."
+  type        = string
+}
+
+variable "gitops_repo_url" {
+  description = "Git repository the root Application syncs gitops/apps from."
   type        = string
 }

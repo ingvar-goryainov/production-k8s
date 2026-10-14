@@ -4,7 +4,7 @@ metadata:
   name: require-readonly-rootfs
 spec:
   validationActions:
-    - Audit
+    {{- toYaml .Values.readOnlyRootFilesystem.validationActions | nindent 4 }}
   matchConstraints:
     resourceRules:
       - apiGroups: [""]
