@@ -1,0 +1,49 @@
+{{- range .Values.personLabel.roles }}
+---
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: person-label-{{ . }}
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        {{ $.Values.personLabel.namespaceLabel }}: {{ . }}
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: >-
+          has(object.metadata.labels)
+          ? [JSONPatch{op: "add", path: "/metadata/labels/person", value: "{{ . }}"}]
+          : [JSONPatch{op: "add", path: "/metadata/labels", value: {"person": "{{ . }}"}}]
+{{- end }}
+---
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: person-label-strip
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+    namespaceSelector:
+      # NotIn also matches namespaces without the label, such as default.
+      matchExpressions:
+        - key: {{ .Values.personLabel.namespaceLabel }}
+          operator: NotIn
+          values: {{ toJson .Values.personLabel.roles }}
+  mutations:
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: >-
+          has(object.metadata.labels) && "person" in object.metadata.labels
+          ? [JSONPatch{op: "remove", path: "/metadata/labels/person"}]
+          : []
