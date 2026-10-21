@@ -32,3 +32,21 @@ variable "gitops_repo_url" {
   description = "Git repository the root Application syncs gitops/apps from."
   type        = string
 }
+
+variable "grafana_admin_password" {
+  description = "Password of the Grafana admin user."
+  type        = string
+  sensitive   = true
+}
+
+variable "telegram_bot_token" {
+  description = "Telegram bot token used by the Grafana alert contact point."
+  type        = string
+  sensitive   = true
+}
+
+variable "telegram_chat_id" {
+  description = "Telegram chat ID that receives Grafana alerts."
+  type        = string
+  sensitive   = true
+}

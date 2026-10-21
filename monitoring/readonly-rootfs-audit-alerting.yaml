@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: readonly-rootfs-audit-alerting
+  namespace: monitoring
+  labels:
+    grafana_alert: "1"
+data:
+  readonly-rootfs-audit.yaml: |
+    apiVersion: 1
+    contactPoints:
+      - orgId: 1
+        name: telegram
+        receivers:
+          - uid: telegram
+            type: telegram
+            settings:
+              bottoken: $TELEGRAM_BOT_TOKEN
+              chatid: $TELEGRAM_CHAT_ID
+    policies:
+      - orgId: 1
+        receiver: telegram
+        group_by:
+          - alertname
+          - namespace
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h
+    groups:
+      - orgId: 1
+        name: kyverno-audit
+        folder: Kyverno
+        interval: 1m
+        rules:
+          - uid: readonly-rootfs-audit-failed
+            title: ReadOnlyRootFilesystemAuditFailed
+            condition: B
+            data:
+              - refId: A
+                queryType: instant
+                relativeTimeRange:
+                  from: 4500
+                  to: 0
+                datasourceUid: loki
+                model:
+                  refId: A
+                  queryType: instant
+                  expr: >-
+                    sum by (namespace, name) (count_over_time(
+                    {job="loki.source.kubernetes_events", namespace=~"mentor|student.+"}
+                    |= "PolicyViolation" |= "require-readonly-rootfs" | logfmt | kind="Pod"
+                    [75m]))
+              - refId: B
+                datasourceUid: __expr__
+                model:
+                  refId: B
+                  type: threshold
+                  expression: A
+                  conditions:
+                    - evaluator:
+                        type: gt
+                        params:
+                          - 0
+            noDataState: OK
+            execErrState: Error
+            for: 0s
+            labels:
+              severity: warning
+            annotations:
+              summary: Pod {{ $labels.namespace }}/{{ $labels.name }} failed the read-only root filesystem audit
+              description: >-
+                Kyverno policy require-readonly-rootfs reports that a container or init container
+                of this pod does not set securityContext.readOnlyRootFilesystem to true.
