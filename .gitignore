@@ -30,7 +30,6 @@ override.tf.json
 kubeconfig
 kubeconfig.*
 *.kubeconfig
-/kubeconfigs/
 *.pem
 *.key
 
