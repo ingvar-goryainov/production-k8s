@@ -11,6 +11,7 @@ metadata:
   name: student01
   labels:
     training/role: student
+    istio-injection: enabled
 ---
 apiVersion: v1
 kind: Namespace
@@ -18,6 +19,7 @@ metadata:
   name: student02
   labels:
     training/role: student
+    istio-injection: enabled
 ---
 apiVersion: v1
 kind: Namespace
@@ -25,6 +27,7 @@ metadata:
   name: student03
   labels:
     training/role: student
+    istio-injection: enabled
 ---
 apiVersion: v1
 kind: Namespace

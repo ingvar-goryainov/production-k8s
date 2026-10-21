@@ -24,6 +24,18 @@ module "eks" {
     }
   } : {}
 
+  # Istio sidecar injection and config validation webhooks served by istiod.
+  node_security_group_additional_rules = {
+    ingress_cluster_15017_webhook = {
+      description                   = "Cluster API to node 15017/tcp webhook"
+      protocol                      = "tcp"
+      from_port                     = 15017
+      to_port                       = 15017
+      type                          = "ingress"
+      source_cluster_security_group = true
+    }
+  }
+
   # Access entries only (no aws-auth ConfigMap). Whoever runs Terraform gets no
   # Kubernetes access; humans and the platform stack assume the dedicated admin role.
   authentication_mode                      = "API"
