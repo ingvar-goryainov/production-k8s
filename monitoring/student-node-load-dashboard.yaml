@@ -1,0 +1,594 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: student-node-load-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  student-node-load.json: |
+    {
+      "uid": "student-node-load",
+      "title": "Student Namespaces / Node Load",
+      "tags": [
+        "kubernetes",
+        "students"
+      ],
+      "timezone": "browser",
+      "schemaVersion": 41,
+      "editable": false,
+      "refresh": "30s",
+      "time": {
+        "from": "now-3h",
+        "to": "now"
+      },
+      "templating": {
+        "list": [
+          {
+            "name": "namespace",
+            "label": "Student namespace",
+            "type": "query",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "query": {
+              "query": "label_values(kube_namespace_labels{label_training_role=\"student\"}, namespace)",
+              "refId": "namespace"
+            },
+            "definition": "label_values(kube_namespace_labels{label_training_role=\"student\"}, namespace)",
+            "refresh": 2,
+            "multi": true,
+            "includeAll": true,
+            "sort": 1,
+            "current": {
+              "text": [
+                "All"
+              ],
+              "value": [
+                "$__all"
+              ]
+            }
+          },
+          {
+            "name": "node",
+            "label": "Node",
+            "type": "query",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "query": {
+              "query": "label_values(kube_node_info, node)",
+              "refId": "node"
+            },
+            "definition": "label_values(kube_node_info, node)",
+            "refresh": 2,
+            "multi": true,
+            "includeAll": true,
+            "allValue": ".*",
+            "sort": 1,
+            "current": {
+              "text": [
+                "All"
+              ],
+              "value": [
+                "$__all"
+              ]
+            }
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "type": "row",
+          "title": "Nodes",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "Node CPU utilisation",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 1,
+            "w": 8,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "custom": {
+                "fillOpacity": 10,
+                "lineWidth": 1,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              },
+              "min": 0,
+              "max": 1
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "1 - avg by (node) (rate(node_cpu_seconds_total{mode=\"idle\", node=~\"$node\"}[$__rate_interval]))",
+              "legendFormat": "{{node}}"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Node memory utilisation",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 8,
+            "y": 1,
+            "w": 8,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "custom": {
+                "fillOpacity": 10,
+                "lineWidth": 1,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              },
+              "min": 0,
+              "max": 1
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "1 - sum by (node) (node_memory_MemAvailable_bytes{node=~\"$node\"}) / sum by (node) (node_memory_MemTotal_bytes{node=~\"$node\"})",
+              "legendFormat": "{{node}}"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "timeseries",
+          "title": "Node load average (1m) per CPU",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 16,
+            "y": 1,
+            "w": 8,
+            "h": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "custom": {
+                "fillOpacity": 10,
+                "lineWidth": 1,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                }
+              },
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (node) (node_load1{node=~\"$node\"}) / count by (node) (node_cpu_seconds_total{mode=\"idle\", node=~\"$node\"})",
+              "legendFormat": "{{node}}"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "row",
+          "title": "Student namespaces per node",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 9,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "CPU share of $node by student namespace",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 10,
+            "w": 8,
+            "h": 9
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "custom": {
+                "fillOpacity": 30,
+                "lineWidth": 1,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "normal",
+                  "group": "A"
+                }
+              },
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (namespace) (node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate5m{namespace=~\"$namespace\", node=~\"$node\"}) / scalar(sum(kube_node_status_allocatable{resource=\"cpu\", node=~\"$node\"}))",
+              "legendFormat": "{{namespace}}"
+            }
+          ],
+          "repeat": "node",
+          "repeatDirection": "h",
+          "maxPerRow": 3,
+          "description": "CPU used by pods of each student namespace as a share of the node's allocatable CPU."
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "Memory share of $node by student namespace",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 19,
+            "w": 8,
+            "h": 9
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "custom": {
+                "fillOpacity": 30,
+                "lineWidth": 1,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "normal",
+                  "group": "A"
+                }
+              },
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (namespace) (node_namespace_pod_container:container_memory_working_set_bytes{namespace=~\"$namespace\", node=~\"$node\"}) / scalar(sum(kube_node_status_allocatable{resource=\"memory\", node=~\"$node\"}))",
+              "legendFormat": "{{namespace}}"
+            }
+          ],
+          "repeat": "node",
+          "repeatDirection": "h",
+          "maxPerRow": 3,
+          "description": "Working-set memory of each student namespace as a share of the node's allocatable memory."
+        },
+        {
+          "id": 8,
+          "type": "row",
+          "title": "Breakdown",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 28,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 9,
+          "type": "table",
+          "title": "Student namespaces by node",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 29,
+            "w": 24,
+            "h": 10
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (node, namespace) (node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate5m{namespace=~\"$namespace\", node=~\"$node\"})",
+              "legendFormat": "",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "refId": "B",
+              "expr": "sum by (node, namespace) (node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate5m{namespace=~\"$namespace\", node=~\"$node\"}) / on (node) group_left () sum by (node) (kube_node_status_allocatable{resource=\"cpu\"})",
+              "legendFormat": "",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "refId": "C",
+              "expr": "sum by (node, namespace) (node_namespace_pod_container:container_memory_working_set_bytes{namespace=~\"$namespace\", node=~\"$node\"})",
+              "legendFormat": "",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "refId": "D",
+              "expr": "sum by (node, namespace) (node_namespace_pod_container:container_memory_working_set_bytes{namespace=~\"$namespace\", node=~\"$node\"}) / on (node) group_left () sum by (node) (kube_node_status_allocatable{resource=\"memory\"})",
+              "legendFormat": "",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "refId": "E",
+              "expr": "sum by (node, namespace) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\", node=~\"$node\"} or (kube_pod_init_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\", node=~\"$node\"} * on (namespace, pod, container) group_left () kube_pod_init_container_info{restart_policy=\"Always\"}))",
+              "legendFormat": "",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "refId": "F",
+              "expr": "sum by (node, namespace) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\", node=~\"$node\"} or (kube_pod_init_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\", node=~\"$node\"} * on (namespace, pod, container) group_left () kube_pod_init_container_info{restart_policy=\"Always\"}))",
+              "legendFormat": "",
+              "instant": true,
+              "format": "table"
+            },
+            {
+              "refId": "G",
+              "expr": "count by (node, namespace) (kube_pod_info{namespace=~\"$namespace\", node=~\"$node\"})",
+              "legendFormat": "",
+              "instant": true,
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "indexByName": {
+                  "node": 0,
+                  "namespace": 1,
+                  "Value #A": 2,
+                  "Value #B": 3,
+                  "Value #C": 4,
+                  "Value #D": 5,
+                  "Value #E": 6,
+                  "Value #F": 7,
+                  "Value #G": 8
+                },
+                "renameByName": {
+                  "node": "Node",
+                  "namespace": "Namespace",
+                  "Value #A": "CPU used (cores)",
+                  "Value #B": "CPU of node",
+                  "Value #C": "Memory used",
+                  "Value #D": "Memory of node",
+                  "Value #E": "CPU requests (cores)",
+                  "Value #F": "Memory requests",
+                  "Value #G": "Pods"
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "sort": [
+                  {
+                    "field": "Node"
+                  }
+                ]
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU of node"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Memory of node"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Memory used"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Memory requests"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU used (cores)"
+                },
+                "properties": [
+                  {
+                    "id": "decimals",
+                    "value": 3
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU requests (cores)"
+                },
+                "properties": [
+                  {
+                    "id": "decimals",
+                    "value": 3
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm"
+          }
+        }
+      ]
+    }

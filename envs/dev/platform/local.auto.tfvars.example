@@ -1,3 +1,7 @@
 # Copy to local.auto.tfvars (gitignored). Terraform loads it automatically.
 # Same bucket as in the repo-root backend.hcl.
 state_bucket = "eks-tfstate-<ACCOUNT_ID>-eu-west-1"
+
+grafana_admin_password = "<GRAFANA_ADMIN_PASSWORD>"
+telegram_bot_token     = "<TELEGRAM_BOT_TOKEN>"
+telegram_chat_id       = "<TELEGRAM_CHAT_ID>"

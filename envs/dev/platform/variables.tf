@@ -27,3 +27,18 @@ variable "argocd_apps_chart_version" {
 variable "gitops_repo_url" {
   type = string
 }
+
+variable "grafana_admin_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "telegram_bot_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "telegram_chat_id" {
+  type      = string
+  sensitive = true
+}
