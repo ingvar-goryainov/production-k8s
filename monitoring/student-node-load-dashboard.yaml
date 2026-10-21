@@ -434,14 +434,14 @@ data:
             },
             {
               "refId": "E",
-              "expr": "sum by (node, namespace) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\", node=~\"$node\"})",
+              "expr": "sum by (node, namespace) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\", node=~\"$node\"} or (kube_pod_init_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\", node=~\"$node\"} * on (namespace, pod, container) group_left () kube_pod_init_container_info{restart_policy=\"Always\"}))",
               "legendFormat": "",
               "instant": true,
               "format": "table"
             },
             {
               "refId": "F",
-              "expr": "sum by (node, namespace) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\", node=~\"$node\"})",
+              "expr": "sum by (node, namespace) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\", node=~\"$node\"} or (kube_pod_init_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\", node=~\"$node\"} * on (namespace, pod, container) group_left () kube_pod_init_container_info{restart_policy=\"Always\"}))",
               "legendFormat": "",
               "instant": true,
               "format": "table"
